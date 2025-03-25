@@ -1,0 +1,80 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_DEFAULT_REGION: us-east-1
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+            
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Environment Segmentation
+        id: env-segmentation
+        run: |
+          if [[ "${{ inputs.env }}" == "dev" ]]; then 
+            echo "access_key=${{ secrets.AWS_ACCESS_KEY_ID_DEV }}" >> "$GITHUB_OUTPUT"
+            echo "secrets_key=${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "access_key=${{ secrets.AWS_ACCESS_KEY_ID_PROD }}" >> "$GITHUB_OUTPUT"
+            echo "secrets_key=${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ steps.env-segmentation.outputs.access_key }}
+          aws-secret-access-key: ${{ steps.env-segmentation.outputs.secrets_key }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3.1.2
+        with:
+          terraform_version: 1.1.7
+
+      - name: Terraform Init
+        working-directory: ./terraform/
+        id: init
+        run: |
+          terraform init -backend-config backends/${{ inputs.env }}.tfvars
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        working-directory: ./terraform/
+        id: terraform-plan
+        run: |
+          terraform plan -no-color -input=false -refresh=false -var-file environments/${{ inputs.env }}.tfvars
+
+      - name: Terraform Plan Status
+        if: steps.terraform-plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        working-directory: ./terraform/
+        id: apply
+        if: steps.terraform-plan.outcome != 'failure' && github.event_name == 'push'
+        run: |
+          terraform apply -var-file environments/${{ inputs.env }}.tfvars -auto-approve
+
+
+
+
