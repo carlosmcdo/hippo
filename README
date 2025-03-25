@@ -5,11 +5,19 @@
 
 This project demonstrates two approaches to hosting a static website on AWS using Terraform, with support for **development** and **production** environments. It features infrastructure provisioning, remote state management, and automated CI/CD using GitHub Actions.
 
+  
+
 ---
+
+  
 
 ## Project Overview
 
+  
+
 This repository provides Infrastructure as Code (IaC) for deploying a static website with:
+
+  
 
 -  EC2-based hosting using a Python webserver.
 
@@ -21,14 +29,19 @@ This repository provides Infrastructure as Code (IaC) for deploying a static web
 
 -  Two environments (dev & prod) managed via separate variable files and secrets.
 
+  
+
 ---
 
+  
 
 ## Prerequisites
 
+  
 
 Ensure you have the following before getting started:
 
+  
 
 1.  Terraform installed locally.
 
@@ -63,25 +76,27 @@ Ensure you have the following before getting started:
 
 Clone the repository and navigate to the Terraform folder:
 
+```bash
 
 git  clone  https://github.com/carlosmcdo/hippo.git
 
 cd  hippo/terraform
 
+```
 
-
+  
 
 Select an environment (dev or prod). For example, to work with dev:
-
+```bash
 terraform init -backend-config="backends/dev.tfvars"
 terraform plan -var-file="environments/dev.tfvars"
-
+```
 
 ## 6. Clean Up Resources
 
-
+```bash
 terraform destroy -var-file="environments/dev.tfvars"
-
+```
 
 ### CI/CD with GitHub Actions
 
@@ -90,6 +105,7 @@ terraform destroy -var-file="environments/dev.tfvars"
 
 GitHub Actions workflows located in `.github/workflows/` provide automated infrastructure management:
 
+  
 
 - Create a new Pull Request
 
