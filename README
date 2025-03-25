@@ -1,112 +1,64 @@
-
 # Terraform Static Website Project
-
-  
 
 This project demonstrates two approaches to hosting a static website on AWS using Terraform, with support for **development** and **production** environments. It features infrastructure provisioning, remote state management, and automated CI/CD using GitHub Actions.
 
-  
-
----
-
-  
-
 ## Project Overview
-
-  
 
 This repository provides Infrastructure as Code (IaC) for deploying a static website with:
 
-  
-
--  EC2-based hosting using a Python webserver.
-
--  S3 + CloudFront for scalable static hosting.
-
--  Remote Terraform state configuration.
-
--  GitHub Actions automation for Terraform commands.
-
--  Two environments (dev & prod) managed via separate variable files and secrets.
-
-  
-
----
-
-  
+- EC2-based hosting using a Python webserver
+- S3 + CloudFront for scalable static hosting
+- Remote Terraform state configuration
+- GitHub Actions automation for Terraform commands
+- Two environments (dev & prod) managed via separate variable files and secrets
 
 ## Prerequisites
 
-  
-
 Ensure you have the following before getting started:
 
-  
-
-1.  Terraform installed locally.
-
-2.  AWS Accounts:
-
-3.  Separate accounts or credentials for `dev` and `prod`.
-
-4.  GitHub Repository with Actions enabled.
-
-5. Set up AWS credentials for CI/CD workflows
-
-6.  In Github console, navigate to: `Settings → Secrets and variables → Actions` in your GitHub repository.
-
-7.  Add the following repository secrets (These secrets are used by GitHub Actions to authenticate with AWS.):
-
--  `AWS_ACCESS_KEY_ID_DEV`
-
--  `AWS_SECRET_ACCESS_KEY_DEV`
-
--  `AWS_ACCESS_KEY_ID_PROD`
-
--  `AWS_SECRET_ACCESS_KEY_PROD`
-
-8. Create a new Key Pair for each environment with `hippo-key-pair` name.
-
-9. Create a new S3 Bucket called `hippo-development-terraform-state` to save the Terraform state.
-
-10. Create a new S3 Bucket called `hippo-production-terraform-state` to save the Terraform state.
----
+1. Terraform installed locally
+2. AWS Accounts:
+   - Separate accounts or credentials for `dev` and `prod`
+3. GitHub Repository with Actions enabled
+4. Set up AWS credentials for CI/CD workflows
+   - In GitHub console, navigate to: `Settings → Secrets and variables → Actions` in your GitHub repository
+   - Add the following repository secrets (These secrets are used by GitHub Actions to authenticate with AWS):
+     - `AWS_ACCESS_KEY_ID_DEV`
+     - `AWS_SECRET_ACCESS_KEY_DEV`
+     - `AWS_ACCESS_KEY_ID_PROD`
+     - `AWS_SECRET_ACCESS_KEY_PROD`
+5. Create a new Key Pair for each environment with `hippo-key-pair` name
+6. Create new S3 Buckets:
+   - `hippo-development-terraform-state` to save the Terraform state
+   - `hippo-production-terraform-state` to save the Terraform state
 
 ## Running Locally
 
 Clone the repository and navigate to the Terraform folder:
 
 ```bash
-
-git  clone  https://github.com/carlosmcdo/hippo.git
-
-cd  hippo/terraform
-
+git clone https://github.com/carlosmcdo/hippo.git
+cd hippo/terraform
 ```
 
-  
-
 Select an environment (dev or prod). For example, to work with dev:
+
 ```bash
 terraform init -backend-config="backends/dev.tfvars"
 terraform plan -var-file="environments/dev.tfvars"
 ```
 
-## 6. Clean Up Resources
+## Clean Up Resources
+
+To destroy the resources for the dev environment:
 
 ```bash
 terraform destroy -var-file="environments/dev.tfvars"
 ```
 
-### CI/CD with GitHub Actions
-
----
-
+## CI/CD with GitHub Actions
 
 GitHub Actions workflows located in `.github/workflows/` provide automated infrastructure management:
 
-  
-
 - Create a new Pull Request
-
-- Review and merge for deploy.
+- Review and merge for deploy
