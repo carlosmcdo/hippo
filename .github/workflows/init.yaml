@@ -1,0 +1,35 @@
+name: Setup CI/CD
+
+on:
+  push:
+    paths-ignore:
+        - "*.md"
+        - "*.zip"
+        - ".gitignore"
+        - ".github/**/*"
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  Init:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+  Environment:
+    needs: Init
+    uses: ./.github/workflows/terraform.yaml
+    with:
+      env: ${{ matrix.value }}
+    secrets: inherit
+    strategy:
+      matrix:
+        value: ["prod", "dev"]
